@@ -1,0 +1,29 @@
+# MSA Scheduled Tasks
+#
+# Each task runs on a fixed interval (or cron expression) and gets
+# injected into the scratchpad's pending_actions when due.
+#
+# Fields:
+#   name             — unique identifier
+#   task             — description injected into the scratchpad
+#   interval_seconds — fixed interval between runs
+#   cron             — cron expression (requires: pip install croniter)
+#   enabled          — set false to skip without deleting
+
+tasks:
+  - name: health_check
+    interval_seconds: 300
+    task: "Read system_stats sensor and log any anomalies to notes"
+    enabled: true
+
+  # Uncomment when a PTZ camera is connected:
+  # - name: ptz_patrol
+  #   interval_seconds: 3600
+  #   task: "Pan camera through quadrants (0, 90, 180, 270 degrees) and take a snapshot at each"
+  #   enabled: false
+
+  # Cron example (requires: pip install croniter):
+  # - name: daily_summary
+  #   cron: "0 8 * * *"
+  #   task: "Summarize yesterday's completed tasks and sensor anomalies"
+  #   enabled: false

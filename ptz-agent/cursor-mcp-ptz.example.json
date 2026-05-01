@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "msa-sim-ptz": {
+      "command": "python3",
+      "args": ["REPLACE_WITH_ABSOLUTE_PATH_TO_MSA_MAIN/msa_mcp/ptz_server.py"],
+      "cwd": "REPLACE_WITH_ABSOLUTE_PATH_TO_MSA_MAIN"
+    }
+  }
+}

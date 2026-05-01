@@ -1,0 +1,64 @@
+# MSA configuration
+#
+# v2 architecture: a long-running supervisor (msa.supervisor) owns the
+# scheduler, the worker pool, and an IPC socket. Each task runs as its
+# own subprocess (msa.worker) with its own LLM session. The chat REPL
+# (msa chat) and the web UI (msa webui) are thin clients on top.
+
+model:
+  # Default: edge / Gemma 4 via Ollama. Same model is used by both the
+  # PTZ vision detector and the agent loop. Pick whichever Gemma 4
+  # variant fits your VRAM:
+  #   gemma4:e2b   ~5 GB  — fast, fine for chat + simple synthesis
+  #   gemma4:e4b   ~9 GB  — better instruction following
+  #   gemma4:31b  ~22 GB  — best for agentic JSON output
+  backend: ollama               # anthropic | vllm | openai | ollama
+  model: gemma4:e2b
+  # 1024 was tight: long `respond` messages with paraphrased scan results
+  # got cut off mid-string and failed JSON parsing. 2048 leaves breathing
+  # room without doubling latency much (Gemma streams).
+  max_tokens: 2048
+  base_url: http://127.0.0.1:11434
+  temperature: 0.4              # tighter than 0.7 — agent output is JSON
+  top_p: 0.95
+  top_k: 40
+  timeout: 600                  # first call after a pull is slow
+
+  # ---- Cloud / Anthropic preset -----------------------------------------
+  # backend: anthropic
+  # model: claude-sonnet-4-20250514
+  # api_key: set via ANTHROPIC_API_KEY env var
+  #
+  # ---- vLLM / OpenAI-compatible preset ----------------------------------
+  # backend: vllm
+  # model: <served-model-name>
+  # base_url: http://localhost:8000/v1
+
+# Hard cap on tool calls per worker run.
+max_iterations: 12
+
+# Supervisor settings.
+supervisor:
+  concurrency: 2                # max workers running simultaneously
+  poll_seconds: 1.5             # scheduler tick interval
+  # The supervisor's IPC socket and the SQLite database default to
+  # ~/.msa/{supervisord.sock,state.db}. Override with $MSA_SOCKET and
+  # $MSA_DB_PATH respectively.
+
+# Web UI defaults (used by `msa webui`).
+webui:
+  host: 127.0.0.1
+  port: 8765
+
+# Tool plugin config — tools/ directory is auto-scanned.
+tools: {}
+  # shell: false                # disable a tool
+
+# Sensor plugin config — sensors/ directory is auto-scanned.
+sensors: {}
+
+# Simulated PTZ (tools/sim_ptz_tool.py, missions, MCP PTZ server)
+sim_ptz:
+  watch_along: false
+  move_delay_seconds: 0.45
+  inference_delay_seconds: 0.35
